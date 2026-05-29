@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>macmirror — 아이폰을 맥의 무선 보조 모니터로</title>
+<meta name="description" content="아이폰·아이패드를 맥의 무선 보조 모니터로. 디스플레이 사이즈 자유 설정 + 프리셋.">
+<meta property="og:title" content="macmirror">
+<meta property="og:description" content="아이폰·아이패드를 맥의 무선 보조 모니터로. 디스플레이 사이즈 자유.">
+<meta property="og:type" content="website">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0a0a0a;
+    --fg: #f5f5f7;
+    --dim: #86868b;
+    --accent: #2997ff;
+    --accent-2: #b964ff;
+    --border: rgba(255,255,255,0.1);
+    --code-bg: #1c1c1e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 120px 0 80px;
+    text-align: center;
+  }
+  .hero-emoji {
+    font-size: 64px;
+    margin-bottom: 24px;
+    letter-spacing: -2px;
+  }
+  .hero h1 {
+    font-size: clamp(48px, 8vw, 88px);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    margin-bottom: 16px;
+    background: linear-gradient(180deg, #fff 0%, #999 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .tagline {
+    font-size: clamp(20px, 3vw, 28px);
+    color: var(--dim);
+    font-weight: 400;
+    margin-bottom: 48px;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--fg);
+    color: var(--bg);
+    border-radius: 980px;
+    font-size: 17px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .cta:hover { transform: translateY(-1px); opacity: 0.9; }
+  .cta.secondary {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    margin-left: 12px;
+  }
+
+  /* Visual */
+  .visual { padding: 60px 0; text-align: center; }
+  .visual-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 32px;
+    padding: 48px;
+    background: var(--code-bg);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .visual-icon { font-size: 64px; line-height: 1; }
+  .visual-arrow {
+    color: var(--accent);
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+  .visual-label {
+    display: block;
+    font-size: 13px;
+    color: var(--dim);
+    margin-top: 8px;
+  }
+
+  /* Sections */
+  section { padding: 80px 0; }
+  section h2 {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  section .lede {
+    font-size: 18px;
+    color: var(--dim);
+    margin-bottom: 48px;
+    max-width: 640px;
+  }
+
+  /* Preset grid */
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+  }
+  .preset {
+    padding: 24px 18px;
+    background: var(--code-bg);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .preset .pname { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .preset .pdim {
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    color: var(--dim);
+  }
+  .preset.custom {
+    background: linear-gradient(135deg, rgba(41,151,255,0.15), rgba(185,100,255,0.12));
+    border-color: rgba(41,151,255,0.4);
+  }
+  .preset.custom .pname { color: var(--accent); }
+  .preset.custom .pdim { color: var(--accent-2); }
+
+  /* Features grid */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .feature {
+    padding: 32px;
+    background: var(--code-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+  }
+  .feature-icon { font-size: 32px; margin-bottom: 16px; }
+  .feature h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+  .feature p { color: var(--dim); font-size: 15px; }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #e8e8ed;
+    margin-top: 24px;
+  }
+  pre .c { color: var(--dim); }
+  pre .k { color: #ff7ab2; }
+  pre .s { color: #ffcb6b; }
+
+  /* Steps */
+  .steps { display: grid; gap: 32px; }
+  .step {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .step-num {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .step h3 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+  .step p { color: var(--dim); margin-bottom: 12px; }
+
+  /* Limits */
+  .limits {
+    background: var(--code-bg);
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid var(--border);
+  }
+  .limits ul { list-style: none; }
+  .limits li {
+    padding: 12px 0;
+    color: var(--dim);
+    border-bottom: 1px solid var(--border);
+  }
+  .limits li:last-child { border-bottom: none; }
+  .limits li::before {
+    content: "·";
+    color: var(--accent);
+    margin-right: 12px;
+    font-weight: bold;
+  }
+
+  /* Sister project banner */
+  .sister {
+    background: linear-gradient(135deg, rgba(41,151,255,0.1), rgba(185,100,255,0.08));
+    border: 1px solid rgba(41,151,255,0.3);
+    border-radius: 16px;
+    padding: 24px 32px;
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .sister .em { font-size: 32px; }
+  .sister h3 { font-size: 18px; font-weight: 600; }
+  .sister p { color: var(--dim); font-size: 14px; }
+  .sister a {
+    color: var(--accent);
+    text-decoration: none;
+    margin-left: auto;
+    font-weight: 500;
+  }
+  .sister a:hover { text-decoration: underline; }
+
+  footer {
+    padding: 60px 0 40px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--dim);
+    font-size: 14px;
+  }
+  footer .made-by { margin-top: 12px; font-size: 13px; opacity: 0.7; }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .hero { padding: 80px 0 60px; }
+    section { padding: 60px 0; }
+    .cta.secondary { margin-left: 0; margin-top: 12px; }
+    .visual-card { padding: 32px; gap: 16px; }
+    .visual-icon { font-size: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <div class="hero-emoji">📱 ⇋ 💻</div>
+    <h1>macmirror</h1>
+    <p class="tagline">
+      아이폰·아이패드를 맥의 무선 보조 모니터로.<br>
+      디스플레이 사이즈는 자유. 프리셋도 있고, 직접 픽셀로 잡아도 됩니다.
+    </p>
+    <a href="https://github.com/Gojaehyeon/macmirror" class="cta">
+      GitHub에서 보기 →
+    </a>
+    <a href="#install" class="cta secondary">설치 방법</a>
+  </div>
+</div>
+
+<div class="visual">
+  <div class="container">
+    <div class="visual-card">
+      <div>
+        <div class="visual-icon">💻</div>
+        <span class="visual-label">macOS<br>가상 디스플레이 (자유 사이즈)</span>
+      </div>
+      <div class="visual-arrow">— HTTP /frame —→</div>
+      <div>
+        <div class="visual-icon">📱</div>
+        <span class="visual-label">iPhone / iPad<br>풀스크린 렌더</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <h2>프리셋 + 사용자 정의</h2>
+    <p class="lede">
+      흔한 아이폰·아이패드 비율은 프리셋으로 한 번에. 그 외엔 W×H 직접 입력해서 정확히 원하는 화면 만들 수 있습니다.
+    </p>
+
+    <div class="preset-grid">
+      <div class="preset"><div class="pname">iPhone Pro Max</div><div class="pdim">860 × 1864</div></div>
+      <div class="preset"><div class="pname">iPhone Pro</div><div class="pdim">786 × 1704</div></div>
+      <div class="preset"><div class="pname">iPhone Mini</div><div class="pdim">720 × 1560</div></div>
+      <div class="preset"><div class="pname">iPad Pro 13"</div><div class="pdim">1664 × 2160</div></div>
+      <div class="preset"><div class="pname">iPad Pro 11"</div><div class="pdim">1668 × 2388</div></div>
+      <div class="preset"><div class="pname">iPad Air</div><div class="pdim">1640 × 2360</div></div>
+      <div class="preset"><div class="pname">iPad mini</div><div class="pdim">1488 × 2266</div></div>
+      <div class="preset"><div class="pname">Square 1:1</div><div class="pdim">1200 × 1200</div></div>
+      <div class="preset"><div class="pname">Landscape 16:9</div><div class="pdim">1920 × 1080</div></div>
+      <div class="preset custom"><div class="pname">사용자 정의</div><div class="pdim">W × H</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>이렇게 동작합니다</h2>
+    <p class="lede">
+      맥에 비공개 <code style="color:var(--accent);">CGVirtualDisplay</code> API 로 가상 디스플레이를 만들고,
+      ScreenCaptureKit 으로 30fps JPEG 캡처. 아이폰은 HTTP 폴링으로 받아서 풀스크린 렌더.
+    </p>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">📐</div>
+        <h3>사이즈 자유</h3>
+        <p>프리셋 한 번 탭 또는 W×H 직접 입력. 메뉴바에서 즉시 변경.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⚡️</div>
+        <h3>30fps HTTP 폴링</h3>
+        <p>WebSocket 의존 없음. 어떤 iOS 환경에서도 동작.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌐</div>
+        <h3>LAN + Cloudflare 터널</h3>
+        <p>같은 WiFi 또는 외부망 양쪽 다. 메뉴바에서 주소 복사.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎛️</div>
+        <h3>메뉴바 앱</h3>
+        <p>Dock 아이콘 없음. 항상 떠 있는 작은 메뉴.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔓</div>
+        <h3>오픈소스</h3>
+        <p>MIT. Swift + SwiftUI 네이티브. 코드 100% 공개.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⌚️</div>
+        <h3>워치 호환</h3>
+        <p>같은 <code style="color:var(--accent);">/frame</code> 으로 워치 버전과 호환.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="container">
+    <h2>설치</h2>
+    <p class="lede">맥쪽 메뉴바 앱 + 아이폰쪽 네이티브 앱.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h3>레포 클론</h3>
+<pre><span class="c"># 어디든</span>
+git clone https://github.com/Gojaehyeon/macmirror.git
+cd macmirror</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h3>맥 앱 빌드</h3>
+          <p>Xcode 16 이상. 처음 실행 시 화면 기록 권한 요청.</p>
+<pre>cd mac
+./build-app.sh
+open macmirror.app</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <h3>iOS 앱 빌드</h3>
+          <p>xcodegen + Xcode. 본인 Apple ID로 서명해서 폰에 배포.</p>
+<pre>cd ../ios
+xcodegen generate
+open MacMirror.xcodeproj
+<span class="c"># Xcode에서 ⌘R</span></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <h3>주소 입력</h3>
+          <p>iOS 앱 가운데 탭 → 맥 메뉴바의 LAN 주소 입력 → 연결.</p>
+<pre><span class="c"># 예시</span>
+192.168.0.10:8890</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>한계 / 알아두실 점</h2>
+    <div class="limits">
+      <ul>
+        <li><strong>비공개 API:</strong> <code style="color:var(--accent);">CGVirtualDisplay</code> 는 비공개. macOS 메이저 업데이트로 깨질 수 있음.</li>
+        <li><strong>System Settings UI:</strong> 너무 작은 가상 디스플레이는 macOS 26.5 의 디스플레이 설정 UI 에서 숨겨질 수 있음. 프리셋은 모두 노출되는 크기로.</li>
+        <li><strong>무료 Apple ID:</strong> 7일마다 재서명 필요.</li>
+        <li><strong>요구 사항:</strong> macOS 14+, iOS 17+, Apple Silicon 권장, Xcode 16+.</li>
+      </ul>
+    </div>
+
+    <div class="sister">
+      <div class="em">⌚️</div>
+      <div>
+        <h3>워치 버전도 있습니다</h3>
+        <p>같은 아키텍처로 애플워치를 맥 보조 모니터로 쓰는 watchmac.</p>
+      </div>
+      <a href="https://watchmac.gojaehyun.com">watchmac.gojaehyun.com →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>
+      <a href="https://github.com/Gojaehyeon/macmirror">GitHub</a>
+      &nbsp;·&nbsp;
+      MIT License
+      &nbsp;·&nbsp;
+      <a href="https://king.gojaehyun.com">king.gojaehyun.com</a>
+    </p>
+    <p class="made-by">
+      디자인이 좀 별로인건 이해해주세요. 클로드가 만들었어요 🤖
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

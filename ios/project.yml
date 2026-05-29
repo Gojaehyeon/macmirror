@@ -1,0 +1,40 @@
+name: MacMirror
+options:
+  bundleIdPrefix: com.macmirror
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+targets:
+  MacMirror:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: macmirror
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen:
+          UIColorName: ""
+        UIStatusBarHidden: true
+        UIViewControllerBasedStatusBarAppearance: false
+        UIRequiresFullScreen: true
+        UIBackgroundModes: []
+        NSLocalNetworkUsageDescription: "같은 Wi-Fi 안의 맥에서 macmirror 스트림을 받기 위해 로컬 네트워크에 접속합니다."
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+          NSAllowsLocalNetworking: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "1,2"
+        PRODUCT_BUNDLE_IDENTIFIER: com.macmirror.ios
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_PREVIEWS: "YES"
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: "NO"

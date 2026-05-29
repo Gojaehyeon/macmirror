@@ -1,0 +1,30 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+*.xcodeproj/
+
+# macOS app artifacts
+mac/macmirror.app/
+
+# Xcode user data
+xcuserdata/
+*.xcworkspace/
+*.xcuserstate
+DerivedData/
+
+# Auto-generated Info.plist (xcodegen)
+ios/Info.plist
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# OMC runtime state
+.omc/
+
+# Vercel
+.vercel
