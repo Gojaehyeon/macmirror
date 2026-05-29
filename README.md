@@ -33,13 +33,26 @@
 
 ## 설치 — 맥 메뉴바 앱
 
+### 방법 A — DMG (권장)
+
+[**macmirror.dmg 다운로드**](https://github.com/Gojaehyeon/macmirror/releases/latest) → 열어서 Applications 폴더로 드래그.
+
+서명/공증 안 된 앱이라 첫 실행은 **우클릭 → 열기** (Gatekeeper 통과). 막히면:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/macmirror.app
+```
+
+### 방법 B — 직접 빌드
+
 ```bash
 cd mac
-./build-app.sh
+./build-app.sh          # macmirror.app 생성
+./make-dmg.sh           # (선택) macmirror.dmg 생성
 open macmirror.app
 ```
 
-메뉴바 → 📱 macmirror 아이콘 → 디스플레이 사이즈에서 프리셋 또는 "사용자 정의…" 선택.
+메뉴바 → macmirror 아이콘 → 디스플레이 사이즈에서 프리셋 또는 "사용자 정의…" 선택.
 
 ## 설치 — iOS 앱
 
