@@ -1,7 +1,11 @@
 #!/bin/bash
 # macmirror.app 만들기 — 메뉴바 앱.
+# Developer ID 인증서가 있으면 hardened runtime 으로 정식 서명, 없으면 ad-hoc.
 set -e
 cd "$(dirname "$0")"
+
+# 서명 ID — 환경변수로 덮어쓸 수 있음. 기본은 보유한 Developer ID.
+SIGN_ID="${MACMIRROR_SIGN_ID:-Developer ID Application: Jahyeon Ko (RP5GZ99V95)}"
 
 echo "① 빌드 중…"
 swift build -c release
@@ -34,7 +38,15 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
-codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
+if security find-identity -v -p codesigning 2>/dev/null | grep -q "$SIGN_ID"; then
+    echo "③ Developer ID 서명 (hardened runtime)…"
+    codesign --force --options runtime --timestamp \
+        --sign "$SIGN_ID" "$APP"
+    echo "   서명 검증:"
+    codesign --verify --strict --verbose=2 "$APP" 2>&1 | tail -2
+else
+    echo "③ Developer ID 인증서 없음 → ad-hoc 서명 (배포 불가, 로컬 실행용)"
+    codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
+fi
 
-echo "③ 완료 → $(pwd)/$APP"
-echo "   더블클릭하거나 'open $APP' 으로 실행하세요."
+echo "④ 완료 → $(pwd)/$APP"

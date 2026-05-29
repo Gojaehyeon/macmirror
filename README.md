@@ -37,11 +37,7 @@
 
 [**macmirror.dmg 다운로드**](https://github.com/Gojaehyeon/macmirror/releases/latest) → 열어서 Applications 폴더로 드래그.
 
-서명/공증 안 된 앱이라 첫 실행은 **우클릭 → 열기** (Gatekeeper 통과). 막히면:
-
-```bash
-xattr -dr com.apple.quarantine /Applications/macmirror.app
-```
+Developer ID 서명 + Apple 공증(notarized)된 앱이라 **더블클릭으로 바로 실행**됩니다. Gatekeeper 우회 불필요.
 
 ### 방법 B — 직접 빌드
 

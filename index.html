@@ -290,7 +290,7 @@
     </a>
     <a href="https://github.com/Gojaehyeon/macmirror" class="cta secondary">GitHub</a>
     <p style="margin-top:16px; font-size:13px; color:var(--dim);">
-      macOS 14+ · 무료 · 오픈소스 &nbsp;·&nbsp; 아이폰 앱은 Xcode 로 직접 빌드
+      macOS 14+ · 무료 · 오픈소스 · Apple 공증 완료 &nbsp;·&nbsp; 아이폰 앱은 Xcode 로 직접 빌드
     </p>
   </div>
 </div>
@@ -382,7 +382,7 @@
 <section id="install">
   <div class="container">
     <h2>설치 — 맥</h2>
-    <p class="lede">DMG 받아서 드래그하면 끝. 빌드 필요 없습니다.</p>
+    <p class="lede">Apple 공증된 DMG. 받아서 드래그하면 끝. 빌드도, Gatekeeper 우회도 필요 없습니다.</p>
 
     <div class="steps">
       <div class="step">
@@ -396,10 +396,8 @@
       <div class="step">
         <div class="step-num">2</div>
         <div>
-          <h3>첫 실행 — 우클릭 → 열기</h3>
-          <p>서명/공증 안 된 앱이라 더블클릭하면 Gatekeeper 가 막습니다. <strong style="color:var(--fg);">앱을 우클릭 → "열기"</strong> 한 번이면 이후로는 그냥 열립니다.</p>
-<pre><span class="c"># 막혔을 때 터미널로 풀 수도 있음</span>
-xattr -dr com.apple.quarantine /Applications/macmirror.app</pre>
+          <h3>더블클릭으로 실행</h3>
+          <p>Apple 공증(notarized)된 앱이라 경고 없이 바로 열립니다. 메뉴바에 macmirror 아이콘 등장.</p>
         </div>
       </div>
 
