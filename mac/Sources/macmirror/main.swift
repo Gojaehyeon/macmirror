@@ -3,12 +3,10 @@ import AppKit
 // Optional CLI overrides (a double-clicked .app just uses the defaults).
 func parseConfig(_ args: [String]) -> StreamController.Config {
     var c = StreamController.Config()
-    // Default preset = iPhone Pro Max (Safari-safe pt sizes), at 2× scale.
-    // The 2× minimum keeps the virtual display visible in System Settings UI.
+    // Default preset = iPhone Pro Max (Safari-safe pixel sizes).
     let p = DevicePreset.default
-    let (w, h) = p.dimensions(scale: 2, landscape: false)
-    c.width = w
-    c.height = h
+    c.width = p.width
+    c.height = p.height
     c.fps = 30
     c.quality = 0.65
     c.port = 8890

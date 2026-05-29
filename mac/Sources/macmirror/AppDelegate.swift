@@ -13,7 +13,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var tunnelStatus: String?
     private var currentPresetName: String = DevicePreset.default.name
     private var orientation: Orientation = .portrait
-    private var scale: DisplayScale = .x2
 
     init(controller: StreamController) {
         self.controller = controller
@@ -36,24 +35,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         tunnel.onShortURL = { [weak self] url in self?.shortURL = url }
         tunnel.onStatus   = { [weak self] status in self?.tunnelStatus = status }
 
-        // Match initial preset / orientation / scale from whatever the CLI set.
+        // Match initial preset name + orientation from whatever the CLI set.
         let cw = controller.config.width
         let ch = controller.config.height
-        var matched = false
-        for s in DisplayScale.allCases {
-            for p in DevicePreset.all {
-                let pw = p.width * s.rawValue, ph = p.height * s.rawValue
-                if pw == cw && ph == ch {
-                    currentPresetName = p.name; orientation = .portrait; scale = s; matched = true
-                    break
-                } else if ph == cw && pw == ch {
-                    currentPresetName = p.name; orientation = .landscape; scale = s; matched = true
-                    break
-                }
-            }
-            if matched { break }
-        }
-        if !matched {
+        if let match = DevicePreset.all.first(where: { $0.width == cw && $0.height == ch }) {
+            currentPresetName = match.name
+            orientation = .portrait
+        } else if let match = DevicePreset.all.first(where: { $0.height == cw && $0.width == ch }) {
+            currentPresetName = match.name
+            orientation = .landscape
+        } else {
             currentPresetName = "사용자 정의"
             orientation = (cw > ch) ? .landscape : .portrait
         }
@@ -79,7 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let running = controller.isRunning
 
         let header = NSMenuItem(
-            title: "📱  macmirror  (\(controller.config.width)×\(controller.config.height) · \(currentPresetName) · \(orientation.rawValue) · \(scale.rawValue)×)",
+            title: "📱  macmirror  (\(controller.config.width)×\(controller.config.height) · \(currentPresetName) · \(orientation.rawValue)\(controller.config.hidpi ? " · HiDPI" : ""))",
             action: nil, keyEquivalent: "")
         header.isEnabled = false
         menu.addItem(header)
@@ -156,16 +147,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         orientRoot.submenu = orientMenu
         menu.addItem(orientRoot)
 
-        // Scale picker
-        let scaleRoot = NSMenuItem(title: "해상도: \(scale.rawValue)×", action: nil, keyEquivalent: "")
-        let scaleMenu = NSMenu()
-        for s in DisplayScale.allCases {
-            let mi = item(s.label, #selector(scaleTapped), object: String(s.rawValue))
-            mi.state = (s == scale) ? .on : .off
-            scaleMenu.addItem(mi)
-        }
-        scaleRoot.submenu = scaleMenu
-        menu.addItem(scaleRoot)
+        // HiDPI toggle — renders content at 2× pixel density inside the same
+        // pixel buffer (text/UI look crisper on Retina iPhones).
+        let hidpi = item(
+            "HiDPI (Retina 렌더링)\(controller.config.hidpi ? "  ✓" : "")",
+            #selector(hidpiTapped))
+        hidpi.state = controller.config.hidpi ? .on : .off
+        menu.addItem(hidpi)
 
         menu.addItem(.separator())
         menu.addItem(item("종료", #selector(quitTapped)))
@@ -201,7 +189,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func presetTapped(_ sender: NSMenuItem) {
         guard let name = sender.representedObject as? String,
               let p = DevicePreset.all.first(where: { $0.name == name }) else { return }
-        let (w, h) = p.dimensions(scale: scale.rawValue, landscape: orientation == .landscape)
+        let (w, h) = p.dimensions(landscape: orientation == .landscape)
         applyDimensions(width: w, height: h, presetName: p.name)
     }
 
@@ -210,29 +198,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
               let o = Orientation(rawValue: raw) else { return }
         guard o != orientation else { return }
         orientation = o
-        // Re-apply current preset under new orientation. Custom sizes get
-        // their W/H swapped explicitly.
         if currentPresetName == "사용자 정의" {
             applyDimensions(width: controller.config.height,
                             height: controller.config.width,
                             presetName: currentPresetName)
         } else if let p = DevicePreset.all.first(where: { $0.name == currentPresetName }) {
-            let (w, h) = p.dimensions(scale: scale.rawValue, landscape: o == .landscape)
+            let (w, h) = p.dimensions(landscape: o == .landscape)
             applyDimensions(width: w, height: h, presetName: p.name)
         }
     }
 
-    @objc private func scaleTapped(_ sender: NSMenuItem) {
-        guard let raw = sender.representedObject as? String,
-              let n = UInt32(raw),
-              let s = DisplayScale(rawValue: n) else { return }
-        guard s != scale else { return }
-        scale = s
-        // Re-apply current preset under new scale. Custom sizes are not rescaled.
-        if let p = DevicePreset.all.first(where: { $0.name == currentPresetName }) {
-            let (w, h) = p.dimensions(scale: s.rawValue, landscape: orientation == .landscape)
-            applyDimensions(width: w, height: h, presetName: p.name)
-        }
+    @objc private func hidpiTapped() {
+        controller.config.hidpi.toggle()
+        if controller.isRunning { controller.restart() }
     }
 
     @objc private func customSizeTapped() {
