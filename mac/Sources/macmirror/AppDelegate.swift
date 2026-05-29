@@ -12,6 +12,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var shortURL: String?
     private var tunnelStatus: String?
     private var currentPresetName: String = DevicePreset.default.name
+    private var orientation: Orientation = .portrait
+    private var scale: DisplayScale = .x2
 
     init(controller: StreamController) {
         self.controller = controller
@@ -34,13 +36,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         tunnel.onShortURL = { [weak self] url in self?.shortURL = url }
         tunnel.onStatus   = { [weak self] status in self?.tunnelStatus = status }
 
-        // Match initial preset name to whatever the CLI/Config set us up with.
-        if let match = DevicePreset.all.first(where: {
-            $0.width == controller.config.width && $0.height == controller.config.height
-        }) {
-            currentPresetName = match.name
-        } else {
+        // Match initial preset / orientation / scale from whatever the CLI set.
+        let cw = controller.config.width
+        let ch = controller.config.height
+        var matched = false
+        for s in DisplayScale.allCases {
+            for p in DevicePreset.all {
+                let pw = p.width * s.rawValue, ph = p.height * s.rawValue
+                if pw == cw && ph == ch {
+                    currentPresetName = p.name; orientation = .portrait; scale = s; matched = true
+                    break
+                } else if ph == cw && pw == ch {
+                    currentPresetName = p.name; orientation = .landscape; scale = s; matched = true
+                    break
+                }
+            }
+            if matched { break }
+        }
+        if !matched {
             currentPresetName = "사용자 정의"
+            orientation = (cw > ch) ? .landscape : .portrait
         }
 
         controller.start()
@@ -64,7 +79,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let running = controller.isRunning
 
         let header = NSMenuItem(
-            title: "📱  macmirror  (\(controller.config.width)×\(controller.config.height) · \(currentPresetName))",
+            title: "📱  macmirror  (\(controller.config.width)×\(controller.config.height) · \(currentPresetName) · \(orientation.rawValue) · \(scale.rawValue)×)",
             action: nil, keyEquivalent: "")
         header.isEnabled = false
         menu.addItem(header)
@@ -130,6 +145,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         presetRoot.submenu = presetMenu
         menu.addItem(presetRoot)
 
+        // Orientation toggle
+        let orientRoot = NSMenuItem(title: "방향: \(orientation.rawValue)", action: nil, keyEquivalent: "")
+        let orientMenu = NSMenu()
+        for o in [Orientation.portrait, .landscape] {
+            let mi = item(o.rawValue, #selector(orientationTapped), object: o.rawValue)
+            mi.state = (o == orientation) ? .on : .off
+            orientMenu.addItem(mi)
+        }
+        orientRoot.submenu = orientMenu
+        menu.addItem(orientRoot)
+
+        // Scale picker
+        let scaleRoot = NSMenuItem(title: "해상도: \(scale.rawValue)×", action: nil, keyEquivalent: "")
+        let scaleMenu = NSMenu()
+        for s in DisplayScale.allCases {
+            let mi = item(s.label, #selector(scaleTapped), object: String(s.rawValue))
+            mi.state = (s == scale) ? .on : .off
+            scaleMenu.addItem(mi)
+        }
+        scaleRoot.submenu = scaleMenu
+        menu.addItem(scaleRoot)
+
         menu.addItem(.separator())
         menu.addItem(item("종료", #selector(quitTapped)))
     }
@@ -164,7 +201,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func presetTapped(_ sender: NSMenuItem) {
         guard let name = sender.representedObject as? String,
               let p = DevicePreset.all.first(where: { $0.name == name }) else { return }
-        applyDimensions(width: p.width, height: p.height, presetName: p.name)
+        let (w, h) = p.dimensions(scale: scale.rawValue, landscape: orientation == .landscape)
+        applyDimensions(width: w, height: h, presetName: p.name)
+    }
+
+    @objc private func orientationTapped(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String,
+              let o = Orientation(rawValue: raw) else { return }
+        guard o != orientation else { return }
+        orientation = o
+        // Re-apply current preset under new orientation. Custom sizes get
+        // their W/H swapped explicitly.
+        if currentPresetName == "사용자 정의" {
+            applyDimensions(width: controller.config.height,
+                            height: controller.config.width,
+                            presetName: currentPresetName)
+        } else if let p = DevicePreset.all.first(where: { $0.name == currentPresetName }) {
+            let (w, h) = p.dimensions(scale: scale.rawValue, landscape: o == .landscape)
+            applyDimensions(width: w, height: h, presetName: p.name)
+        }
+    }
+
+    @objc private func scaleTapped(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String,
+              let n = UInt32(raw),
+              let s = DisplayScale(rawValue: n) else { return }
+        guard s != scale else { return }
+        scale = s
+        // Re-apply current preset under new scale. Custom sizes are not rescaled.
+        if let p = DevicePreset.all.first(where: { $0.name == currentPresetName }) {
+            let (w, h) = p.dimensions(scale: s.rawValue, landscape: orientation == .landscape)
+            applyDimensions(width: w, height: h, presetName: p.name)
+        }
     }
 
     @objc private func customSizeTapped() {

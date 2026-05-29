@@ -16,11 +16,13 @@
 
 ## 특징
 
-- **프리셋 + 사용자 정의** — iPhone Pro Max / Pro / Mini · iPad Pro 13"/11"/Air/mini · 1:1 / 16:9 · 임의 W×H
+- **사파리 안전영역 반영 프리셋** — Dynamic Island·홈 인디케이터·툴바 제외한 실제 가용 viewport 기준
+- **가로/세로 토글** — 메뉴바에서 즉시 회전, 모든 프리셋과 사용자 정의에 적용
+- **사용자 정의 W×H** — 200~8192px 사이 임의 사이즈
 - **메뉴바 앱** — Dock 아이콘 없음, 항상 떠 있음
 - **HTTP 폴링** — WebSocket 의존 없음, 어떤 iOS 환경에서도 동작
 - **Cloudflare 터널** — 셀룰러나 외부망에서 접속 가능 (선택)
-- **워치 버전** — [watchmac](https://github.com/Gojaehyeon/watchmac) 과 같은 아키텍처, 같은 `/frame` 호환
+- **워치 호환** — [watchmac](https://github.com/Gojaehyeon/watchmac) 과 같은 `/frame` 엔드포인트
 
 ## 요구 사항
 

@@ -3,11 +3,12 @@ import AppKit
 // Optional CLI overrides (a double-clicked .app just uses the defaults).
 func parseConfig(_ args: [String]) -> StreamController.Config {
     var c = StreamController.Config()
-    // iPhone Pro Max aspect ≈ 0.461 (430×932 pt). Use a 2× virtual display so
-    // macOS keeps it visible in System Settings → Displays.
+    // Default preset = iPhone Pro Max (Safari-safe pt sizes), at 2× scale.
+    // The 2× minimum keeps the virtual display visible in System Settings UI.
     let p = DevicePreset.default
-    c.width = p.width
-    c.height = p.height
+    let (w, h) = p.dimensions(scale: 2, landscape: false)
+    c.width = w
+    c.height = h
     c.fps = 30
     c.quality = 0.65
     c.port = 8890
