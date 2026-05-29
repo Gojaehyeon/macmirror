@@ -13,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var tunnelStatus: String?
     private var currentPresetName: String = DevicePreset.default.name
     private var orientation: Orientation = .portrait
+    private var appearanceObservation: NSKeyValueObservation?
 
     init(controller: StreamController) {
         self.controller = controller
@@ -22,6 +23,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         updateIcon(running: false)
+
+        // Re-paint the menu bar icon when the user toggles dark/light mode.
+        appearanceObservation = NSApp.observe(\.effectiveAppearance) { [weak self] _, _ in
+            guard let self else { return }
+            self.updateIcon(running: self.controller.isRunning)
+        }
 
         let menu = NSMenu()
         menu.delegate = self
@@ -57,10 +64,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func updateIcon(running: Bool) {
         guard let button = statusItem.button else { return }
-        let image = NSImage(systemSymbolName: "iphone", accessibilityDescription: "macmirror")
+        let image = NSImage(systemSymbolName: "rectangle.on.rectangle", accessibilityDescription: "macmirror")
         image?.isTemplate = true
         button.image = image
-        button.contentTintColor = running ? .systemGreen : nil
+        // Always white in dark, always black in light. Running state is shown
+        // via the menu text, not the icon color.
+        let isDark = button.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        button.contentTintColor = isDark ? .white : .black
     }
 
     // MARK: - Menu
