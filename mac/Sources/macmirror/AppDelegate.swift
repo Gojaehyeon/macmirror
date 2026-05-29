@@ -64,13 +64,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func updateIcon(running: Bool) {
         guard let button = statusItem.button else { return }
-        let image = NSImage(systemSymbolName: "rectangle.on.rectangle", accessibilityDescription: "macmirror")
-        image?.isTemplate = true
-        button.image = image
-        // Always white in dark, always black in light. Running state is shown
-        // via the menu text, not the icon color.
-        let isDark = button.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-        button.contentTintColor = isDark ? .white : .black
+
+        // Template tint and palette config both proved unreliable on this
+        // wallpaper-tinted dark menu bar. Draw the symbol into a fresh image and
+        // flood it with the target color via sourceAtop — guarantees solid
+        // white (dark mode) / black (light mode) pixels nothing can re-tint.
+        let isDark = UserDefaults.standard.string(forKey: "AppleInterfaceStyle") == "Dark"
+        let color: NSColor = isDark ? .white : .black
+        guard let base = NSImage(systemSymbolName: "rectangle.on.rectangle",
+                                 accessibilityDescription: "macmirror") else { return }
+        let tinted = NSImage(size: base.size, flipped: false) { rect in
+            base.draw(in: rect)
+            color.set()
+            rect.fill(using: .sourceAtop)
+            return true
+        }
+        tinted.isTemplate = false
+        button.image = tinted
+        button.contentTintColor = nil
     }
 
     // MARK: - Menu
